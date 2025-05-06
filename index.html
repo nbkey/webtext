@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>键值对管理器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 60%;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        input[type=text] {
+            padding: 10px;
+            width: 30%;
+            margin: 5px;
+        }
+        button {
+            padding: 10px 15px;
+            margin-left: 10px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+        li {
+            background-color: #f9f9f9;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .delete-btn {
+            color: red;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>键值对管理器</h1>
+
+    <!-- 添加 -->
+    <div>
+        <input type="text" id="newKey" placeholder="请输入产品">
+        <input type="text" id="newValue" placeholder="请输入产品详情">
+        <button onclick="addItem()">添加</button>
+    </div>
+
+    <!-- 查询 -->
+    <div style="margin-top: 20px;">
+        <input type="text" id="key" placeholder="请输入键">
+        <button onclick="lookup()">查询</button>
+        <p id="result"></p>
+    </div>
+
+    <!-- 列表展示 -->
+    <h2>所有键值对</h2>
+    <ul id="allItems"></ul>
+</div>
+
+<script>
+    // 从 localStorage 加载 map
+    function loadMap() {
+        const stored = localStorage.getItem('keyValueMap');
+        return stored ? JSON.parse(stored) : {};
+    }
+
+    // 将 map 保存到 localStorage
+    function saveMap(map) {
+        localStorage.setItem('keyValueMap', JSON.stringify(map));
+    }
+
+    // 初始化 map
+    let map = loadMap();
+
+    // 显示列表
+    function displayAll() {
+        const container = document.getElementById('allItems');
+        container.innerHTML = '';
+        for (let key in map) {
+            if (map.hasOwnProperty(key)) {
+                const li = document.createElement('li');
+
+                const text = document.createElement('span');
+                text.textContent = `${key}: ${map[key]}`;
+
+                const delBtn = document.createElement('span');
+                delBtn.textContent = '❌ 删除';
+                delBtn.className = 'delete-btn';
+                delBtn.onclick = () => {
+                    delete map[key];
+                    saveMap(map); // 保存更新后的 map
+                    displayAll(); // 重新渲染
+                };
+
+                li.appendChild(text);
+                li.appendChild(delBtn);
+                container.appendChild(li);
+            }
+        }
+    }
+
+    // 添加键值对
+    function addItem() {
+        const keyInput = document.getElementById('newKey');
+        const valInput = document.getElementById('newValue');
+        const key = keyInput.value.trim();
+        const value = valInput.value.trim();
+
+        if (!key) {
+            alert('键不能为空');
+            return;
+        }
+
+        map[key] = value;
+        saveMap(map);
+
+        keyInput.value = '';
+        valInput.value = '';
+        displayAll();
+    }
+
+    // 查询键
+    function lookup() {
+        const key = document.getElementById('key').value.trim();
+        const result = document.getElementById('result');
+        if (map.hasOwnProperty(key)) {
+            result.textContent = `${map[key]}`;
+        } else {
+            result.textContent = '未找到该键';
+        }
+    }
+
+    // 页面加载时显示
+    window.onload = displayAll;
+</script>
+
+</body>
+</html>
